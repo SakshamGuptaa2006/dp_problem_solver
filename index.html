@@ -1,0 +1,654 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+
+    <title>Slides</title>
+
+    <link rel="stylesheet" href="dist/reset.css" />
+    <link rel="stylesheet" href="dist/reveal.css" />
+    <link rel="stylesheet" href="dist/theme/project_03.css" />
+
+    <!-- Theme used for syntax highlighted code -->
+    <link rel="stylesheet" href="plugin/highlight/equilibrium-gray-light.css" />
+  </head>
+  <body>
+    <div class="reveal">
+      <div class="slides">
+        <!-- Project 03 -->
+        <section>
+          <h1>SC2001 Project 03</h1>
+          <p>Dynamic Programming</p>
+          <p><b>Team 5</b></p>
+        </section>
+
+        <section>
+          <h2>Part I</h2>
+        </section>
+
+        <section>
+          <p>
+            Because there are unlimited supplies of each type of object, this is
+            referred to as the <b>unbounded knapsack</b> problem. Adopting the
+            notation in the handout, our recursive definition is as follows.
+          </p>
+          <p>
+            \[ P(C) = \begin{cases} 0 & \text{if $C = 0$} \\ \max \left( \left\{
+            P(C-w_i) + p_i \right\} \right) & \text{for all $0 \leq i \leq n-1$
+            and $C \geq w_i$} \end{cases} \]
+          </p>
+        </section>
+
+        <section>
+          <h2>Part II</h2>
+        </section>
+
+        <section>
+          <img
+            style="border: 3px solid #323030"
+            src="project_03/graph.jpg"
+            alt="screenshot"
+          />
+          <p>
+            Here's the subproblem graph, where each node represents the capacity
+            and the edges represent the transitions between DP states.
+          </p>
+        </section>
+
+        <section>
+          <h2>Part III</h2>
+        </section>
+
+        <section data-auto-animate>
+          <p>
+            A natural way to perform bottom-up DP is to iterate over the objects
+            and attempt to use each one to increase the profit at each capacity
+            level.
+          </p>
+        </section>
+
+        <section data-auto-animate>
+          <p>
+            A natural way to perform bottom-up DP is to iterate over the objects
+            and attempt to use each one to increase the profit at each capacity
+            level.
+          </p>
+          <pre>
+            <code data-line-numbers data-trim data-noescape class="cpp">
+              <script type="text/template">
+              int n = 3;
+
+              vector<int> w{ 4, 6, 8 };
+              vector<ll> p{ 7, 6, 9 };
+
+              auto solve = [&](int c) -> ll {
+                vector dp(n, vector(c + 1, 0LL));
+                for (int i = 0; i < n; i++) {
+                  for (int j = 0; j <= c; j++) {
+                    dp[i][j] = i ? dp[i - 1][j] : 0;
+                    if (j - w[i] >= 0) dp[i][j] = max(dp[i][j], dp[i][j - w[i]] + p[i]);
+                  }
+                }
+                return dp[n - 1][c];
+              };
+              </script>
+            </code>
+          </pre>
+        </section>
+
+        <section data-auto-animate>
+          <p>
+            A natural way to perform bottom-up DP is to iterate over the objects
+            and attempt to use each one to increase the profit at each capacity
+            level.
+          </p>
+          <pre>
+            <code data-line-numbers data-trim data-noescape class="cpp">
+              <script type="text/template">
+              int n = 3;
+
+              vector<int> w{ 4, 6, 8 };
+              vector<ll> p{ 7, 6, 9 };
+
+              auto solve = [&](int c) -> ll {
+                vector dp(n, vector(c + 1, 0LL));
+                for (int i = 0; i < n; i++) {
+                  for (int j = 0; j <= c; j++) {
+                    dp[i][j] = i ? dp[i - 1][j] : 0;
+                    if (j - w[i] >= 0) dp[i][j] = max(dp[i][j], dp[i][j - w[i]] + p[i]);
+                  }
+                }
+                return dp[n - 1][c];
+              };
+              </script>
+            </code>
+          </pre>
+          <blockquote>
+            It is evident that both the time and space complexity are
+            $\mathcal{O}(nC)$.
+          </blockquote>
+        </section>
+
+        <section>
+          Actually, memory-wise, we can do better than $\mathcal{O}(nC)$. Notice
+          that we only require the latest array as we progress through the 2D DP
+          grid.
+        </section>
+
+        <section data-auto-animate>
+          <p>Here's a revised implementation using $\mathcal{O}(C)$ memory.</p>
+          <pre>
+            <code data-line-numbers data-trim data-noescape class="cpp">
+              <script type="text/template">
+              auto solve = [&](int c) -> ll {
+                vector dp(c + 1, 0LL);
+                for (int i = 0; i < n; i++) {
+                  for (int j = 0; j <= c; j++) {
+                    if (j - w[i] >= 0) dp[j] = max(dp[j], dp[j - w[i]] + p[i]);
+                  }
+                }
+                return dp[c];
+              };
+              </script>
+            </code>
+          </pre>
+        </section>
+
+        <section data-auto-animate>
+          <p>Here's a revised implementation using $\mathcal{O}(C)$ memory.</p>
+          <pre>
+            <code data-line-numbers data-trim data-noescape class="cpp">
+              <script type="text/template">
+              auto solve = [&](int c) -> ll {
+                vector dp(c + 1, 0LL);
+                for (int i = 0; i < n; i++) {
+                  for (int j = 0; j <= c; j++) {
+                    if (j - w[i] >= 0) dp[j] = max(dp[j], dp[j - w[i]] + p[i]);
+                  }
+                }
+                return dp[c];
+              };
+              </script>
+            </code>
+          </pre>
+          <blockquote>
+            For problems where there are multiple objects with the same weight,
+            you could "fuse" them into one object with the best profit!
+          </blockquote>
+        </section>
+
+        <section>
+          <h2>Part IV</h2>
+        </section>
+
+        <section>
+          <p>
+            Given <b>w = [4, 6, 8]</b> and <b>p = [7, 6, 9]</b>, we obtained the
+            following results.
+          </p>
+          <table align="center">
+            <tr>
+              <td align="right"><b>C</b></td>
+              <td align="right">0</td>
+              <td align="right">1</td>
+              <td align="right">2</td>
+              <td align="right">3</td>
+              <td align="right">4</td>
+              <td align="right">5</td>
+              <td align="right">6</td>
+              <td align="right">7</td>
+              <td align="right">8</td>
+              <td align="right">9</td>
+              <td align="right">10</td>
+              <td align="right">11</td>
+              <td align="right">12</td>
+              <td align="right">13</td>
+              <td align="right">14</td>
+            </tr>
+            <tr>
+              <td align="right"><b>DP</b></td>
+              <td align="right">0</td>
+              <td align="right">0</td>
+              <td align="right">0</td>
+              <td align="right">0</td>
+              <td align="right">7</td>
+              <td align="right">7</td>
+              <td align="right">7</td>
+              <td align="right">7</td>
+              <td align="right">14</td>
+              <td align="right">14</td>
+              <td align="right">14</td>
+              <td align="right">14</td>
+              <td align="right">21</td>
+              <td align="right">21</td>
+              <td align="right">21</td>
+            </tr>
+          </table>
+          <blockquote>The solution is <b>dp[c] = 21</b> (c = 14).</blockquote>
+        </section>
+
+        <section>
+          <p>
+            Given <b>w = [5, 6, 8]</b> and <b>p = [7, 6, 9]</b>, we obtained the
+            following results.
+          </p>
+          <table align="center">
+            <tr>
+              <td align="right"><b>C</b></td>
+              <td align="right">0</td>
+              <td align="right">1</td>
+              <td align="right">2</td>
+              <td align="right">3</td>
+              <td align="right">4</td>
+              <td align="right">5</td>
+              <td align="right">6</td>
+              <td align="right">7</td>
+              <td align="right">8</td>
+              <td align="right">9</td>
+              <td align="right">10</td>
+              <td align="right">11</td>
+              <td align="right">12</td>
+              <td align="right">13</td>
+              <td align="right">14</td>
+            </tr>
+            <tr>
+              <td align="right"><b>DP</b></td>
+              <td align="right">0</td>
+              <td align="right">0</td>
+              <td align="right">0</td>
+              <td align="right">0</td>
+              <td align="right">0</td>
+              <td align="right">7</td>
+              <td align="right">7</td>
+              <td align="right">7</td>
+              <td align="right">9</td>
+              <td align="right">9</td>
+              <td align="right">14</td>
+              <td align="right">14</td>
+              <td align="right">14</td>
+              <td align="right">16</td>
+              <td align="right">16</td>
+            </tr>
+          </table>
+          <blockquote>The solution is <b>dp[c] = 16</b> (c = 14).</blockquote>
+        </section>
+
+        <section>
+          <h2>An Alternative Solution</h2>
+        </section>
+
+        <section data-auto-animate>
+          <p>
+            More often than not, you'll encounter situations where $n,C \leq
+            10^3$, so the $\mathcal{O}(nC)$ solution would pass comfortably.
+          </p>
+        </section>
+
+        <section data-auto-animate>
+          <p>
+            More often than not, you'll encounter situations where $n,C \leq
+            10^3$, so the $\mathcal{O}(nC)$ solution would pass comfortably.
+          </p>
+          <blockquote>
+            However, there are rare situations where you're given $w \leq 10^3,
+            C \leq 10^9$. Let $W = w_{\max}$ from now on.
+          </blockquote>
+        </section>
+
+        <section data-auto-animate>
+          <p>
+            Let $a_i$ represent the answer to a given capacity $i$, observe that
+            $a_i = \max_{j+k=i}(a_j + a_k)$, and we can further constraint $j$
+            and $k$ to $\lvert j - k \rvert \leq W$.
+          </p>
+        </section>
+
+        <section data-auto-animate>
+          <p>
+            Let $a_i$ represent the answer to a given capacity $i$, observe that
+            $a_i = \max_{j+k=i}(a_j + a_k)$, and we can further constraint $j$
+            and $k$ to $\lvert j - k \rvert \leq W$.
+          </p>
+          <blockquote>
+            Suppose $j > k+W$, observe that we can repeatedly deduct $W$ from
+            $j$ and add it to $k$, until the aforementioned property is
+            satisfied; this can be thought of as moving the "slot" for a single
+            object from $j$ to $k$.
+          </blockquote>
+        </section>
+
+        <section data-auto-animate>
+          <p>
+            If we had arrays $A$ and $B$ of length $n$ and $m$ respectively, the
+            array $C$ of length $n+m-1$ constructed using $C_i =
+            \max_{j+k=i}(A_j + B_k)$ is known as the $(\max, +)$
+            <b>convolution</b>.
+          </p>
+        </section>
+
+        <section data-auto-animate>
+          <p>
+            If we had arrays $A$ and $B$ of length $n$ and $m$ respectively, the
+            array $C$ of length $n+m-1$ constructed using $C_i =
+            \max_{j+k=i}(A_j + B_k)$ is known as the $(\max, +)$
+            <b>convolution</b>.
+          </p>
+          <blockquote>
+            Suppose we had $[a_{x-W},\ldots,a_{x},\ldots,a_{x+W}]$ and
+            $[a_{y-W},\ldots,a_{y},\ldots,a_{y+W}]$, our goal is to compute
+            $[a_{x+y-W},\ldots,a_{x+y},\ldots,a_{x+y+W}]$.
+          </blockquote>
+        </section>
+
+        <section>
+          <p>
+            Convoluting $[a_{x-W},\ldots,a_{x},\ldots,a_{x+W}]$ with
+            $[a_{y-W},\ldots,a_{y},\ldots,a_{y+W}]$ produces
+            $[c_{x+y-2W},\ldots,c_{x+y},\ldots,c_{x+y+2W}]$, of which only
+            $[c_{x+y-W},\ldots,c_{x+y}] = [a_{x+y-W},\ldots,a_{x+y}]$ is usable.
+          </p>
+        </section>
+
+        <section data-auto-animate>
+          <p>
+            Convoluting this newly obtained $[a_{x+y-W},\ldots,a_{x+y}]$ with
+            $[a_{0},\ldots,a_{W},\ldots,a_{2W}]$ yields
+            $[c_{x+y-W},\ldots,c_{x+y+2W}]$ and $[c_{x+y+1},\ldots,c_{x+y+W}] =
+            [a_{x+y+1},\ldots,a_{x+y+W}]$ may be used to obtain the "tail" of
+            our desired array.
+          </p>
+        </section>
+
+        <section data-auto-animate>
+          <p>
+            Convoluting this newly obtained $[a_{x+y-W},\ldots,a_{x+y}]$ with
+            $[a_{0},\ldots,a_{W},\ldots,a_{2W}]$ yields
+            $[c_{x+y-W},\ldots,c_{x+y+2W}]$ and $[c_{x+y+1},\ldots,c_{x+y+W}] =
+            [a_{x+y+1},\ldots,a_{x+y+W}]$ may be used to obtain the "tail" of
+            our desired array.
+          </p>
+          <blockquote>
+            Concatenating $[a_{x+y-W},\ldots,a_{x+y}]$ with
+            $[a_{x+y+1},\ldots,a_{x+y+W}]$ gives us
+            $[a_{x+y-W},\ldots,a_{x+y},\ldots,a_{x+y+W}]$, as desired.
+          </blockquote>
+        </section>
+
+        <section data-auto-animate>
+          <h3>What's the best way to compute $2^{64}$?</h3>
+        </section>
+
+        <section data-auto-animate>
+          <h3>What's the best way to compute $2^{64}$?</h3>
+          <p>
+            We could do it in $64$ steps, but what if we computed $2^{1}$, then
+            used it to compute $2^{2}$, then $2^{4}$, followed by $2^{8}$ and so
+            on?
+          </p>
+          <p>This takes just seven steps!</p>
+        </section>
+
+        <section data-auto-animate>
+          <h3>What about $2^{57}$?</h3>
+        </section>
+
+        <section data-auto-animate>
+          <h3>What about $2^{57}$?</h3>
+          <p>
+            Observe that in binary, $57$ is $111001$, so we could use $2^{(2^0)}
+            \cdot 2^{(2^3)} \cdot 2^{(2^4)} \cdot 2^{(2^5)}$. These are
+            precisely the values we've precomputed earlier.
+          </p>
+        </section>
+
+        <section data-auto-animate>
+          <h3>What about $2^{57}$?</h3>
+          <p>
+            Observe that in binary, $57$ is $111001$, so we could use $2^{(2^0)}
+            \cdot 2^{(2^3)} \cdot 2^{(2^4)} \cdot 2^{(2^5)}$. These are
+            precisely the values we've precomputed earlier.
+          </p>
+          <blockquote>
+            In general, this principle is known as <b>doubling</b>, and it's
+            used in data structures like Sparse Table and Fenwick Tree.
+          </blockquote>
+        </section>
+
+        <section>
+          <p>
+            Let $b_i = [2^i \cdot W - W, \ldots, 2^i \cdot W , \ldots, 2^i \cdot
+            W + W ]$, e.g., $b_0 = [0, \ldots, W , \ldots, 2W ]$.
+          </p>
+          <pre>
+            <code data-line-numbers data-trim data-noescape class="cpp">
+              <script type="text/template">
+              constexpr int WMAX = 1'000, LMAX = 20;
+              vector lvls(LMAX + 1, vector<ll>(2 * WMAX + 1));
+
+              for (int i = 0; i < n; i++) {
+                for (int j = 0; j <= 2 * WMAX; j++) {
+                  if (j - w[i] >= 0) {
+                    lvls[0][j] = max(lvls[0][j], lvls[0][j - w[i]] + p[i]);
+                  }
+                }
+              }
+              </script>
+            </code>
+          </pre>
+        </section>
+
+        <section>
+          <p>
+            A convolution may be implemented in $O(W^2)$ as described earlier.
+          </p>
+          <pre>
+            <code data-line-numbers data-trim data-noescape class="cpp">
+              <script type="text/template">
+              auto convolute = [&](const vector<ll> &a, const vector<ll> &b) {
+                int n = ssize(a), m = ssize(b);
+                vector<ll> ans(n + m - 1);
+                for (int i = 0; i < n; i++) {
+                  for (int j = 0; j < m; j++) {
+                    ans[i + j] = max(ans[i + j], a[i] + b[j]);
+                  }
+                }
+                return ans;
+              };
+              </script>
+            </code>
+          </pre>
+        </section>
+
+        <section>
+          <p>
+            "Merging" $[a_{x-W},\ldots,a_{x},\ldots,a_{x+W}]$ with
+            $[a_{y-W},\ldots,a_{y},\ldots,a_{y+W}]$ to compute
+            $[a_{x+y-W},\ldots,a_{x+y},\ldots,a_{x+y+W}]$ is a little tricky.
+          </p>
+          <pre>
+            <code data-line-numbers data-trim data-noescape class="cpp">
+              <script type="text/template">
+              auto merge = [&](const vector<ll> &a, const vector<ll> &b) {
+                vector<ll> _ = convolute(a, b), ans;
+                for (int i = 0; i < WMAX + 1; i++) ans.push_back(_[i + WMAX]);
+                vector<ll> __ = convolute(lvls[0], ans), bak;
+                for (int i = 0; i < WMAX; i++) bak.push_back(__[i + WMAX + 1]);
+                for (auto &i : bak) ans.push_back(i);
+                return ans;
+              };
+              </script>
+            </code>
+          </pre>
+        </section>
+
+        <section>
+          <p>We may now build `lvls` from the bottom up.</p>
+          <pre>
+            <code data-line-numbers data-trim data-noescape class="cpp">
+              <script type="text/template">
+              for (int lv = 1; lv <= LMAX; lv++) {
+                lvls[lv] = merge(lvls[lv - 1], lvls[lv - 1]);
+              }
+              </script>
+            </code>
+          </pre>
+        </section>
+
+        <section data-auto-animate>
+          <p>Solving for a particular capacity can now be done.</p>
+          <pre>
+            <code data-line-numbers data-trim data-noescape class="cpp">
+              <script type="text/template">
+              int cr = 0;
+              vector<ll> base;
+
+              for (int lv = LMAX; lv >= 0; lv--) {
+                if ((cr | (1 << lv)) * WMAX - WMAX >= c + 1) continue;
+                base = empty(base) ? lvls[lv] : merge(base, lvls[lv]);
+                cr |= (1 << lv);
+              }
+
+              ll ans = base[c - (cr * WMAX - WMAX)];
+              </script>
+            </code>
+          </pre>
+        </section>
+
+        <section data-auto-animate>
+          <p>Solving for a particular capacity can now be done.</p>
+          <pre>
+            <code data-line-numbers data-trim data-noescape class="cpp">
+              <script type="text/template">
+              int cr = 0;
+              vector<ll> base;
+
+              for (int lv = LMAX; lv >= 0; lv--) {
+                if ((cr | (1 << lv)) * WMAX - WMAX >= c + 1) continue;
+                base = empty(base) ? lvls[lv] : merge(base, lvls[lv]);
+                cr |= (1 << lv);
+              }
+
+              ll ans = base[c - (cr * WMAX - WMAX)];
+              </script>
+            </code>
+          </pre>
+          <blockquote>
+            Ultimately, this takes $O(W^2 \cdot \log(C))$ time and space
+            complexity.
+          </blockquote>
+        </section>
+
+        <section>
+          <img
+            style="border: 3px solid #323030"
+            src="project_03/screenshot.png"
+            alt="screenshot"
+          />
+          <p>
+            We now have the tools to solve
+            <a href="https://codeforces.com/gym/101064/problem/L">this</a>
+            problem...
+          </p>
+        </section>
+
+        <section>
+          <h1>Thank You</h1>
+          <blockquote>
+            <a href="https://github.com/anAcc22/SC2001_Group_Project">
+              https://github.com/anAcc22/SC2001_Group_Project
+            </a>
+          </blockquote>
+        </section>
+
+        <section>
+          <h3>References</h3>
+          <ul style="font-size: 26px">
+            <li>
+              Fenwick tree. Fenwick Tree - Algorithms for Competitive
+              Programming. (2024, July 31).
+              https://cp-algorithms.com/data_structures/fenwick.html
+            </li>
+            <li>
+              USP, M. (2016). Problem L. The Knapsack Problem. Codeforces.
+              https://codeforces.com/gym/101064/problem/L
+            </li>
+            <li>
+              errorgorn. (2021). [tutorial] knapsack, subset sum and the (max,+)
+              convolution. Codeforces. https://codeforces.com/blog/entry/98663
+            </li>
+          </ul>
+        </section>
+      </div>
+    </div>
+
+    <script src="dist/reveal.js"></script>
+    <script src="plugin/notes/notes.js"></script>
+    <script src="plugin/math/math.js"></script>
+    <script src="plugin/markdown/markdown.js"></script>
+    <script src="plugin/highlight/highlight.js"></script>
+
+    <!-- Chart Plugin -->
+    <script src="https://cdn.jsdelivr.net/npm/reveal.js-plugins@latest/chart/plugin.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.2.0/chart.min.js"></script>
+
+    <script>
+      // More info about initialization & config:
+      // - https://revealjs.com/initialization/
+      // - https://revealjs.com/config/
+
+      Chart.defaults.font.family = "Maple Mono";
+      Chart.defaults.font.size = 16;
+
+      Reveal.initialize({
+        hash: true,
+
+        transition: "slide",
+        autoAnimateDuration: 0.8,
+
+        maxScale: 1.0, // PERF: resolves blurry font issue
+        minScale: 0.2,
+
+        chart: {
+          defaults: {
+            color: "#121212",
+            scale: {
+              grid: {
+                color: "#424242",
+              },
+            },
+          },
+          line: {
+            borderColor: ["#447754d1", "#824232d1", "#826222d1", "#6687b1"],
+            borderDash: [
+              [0, 0],
+              [0, 0],
+            ],
+          },
+          scatter: {
+            borderColor: ["#447754d1", "#824232d1", "#826222d1", "#6687b1"],
+            backgroundColor: ["#447754d1", "#824232d1", "#826222d1", "#6687b1"],
+            borderDash: [
+              [0, 0],
+              [0, 0],
+              [0, 0],
+            ],
+            pointRadius: [1, 1, 1],
+          },
+        },
+
+        // Learn about plugins: https://revealjs.com/plugins/
+        plugins: [
+          RevealMarkdown,
+          RevealHighlight,
+          RevealNotes,
+          RevealChart,
+          RevealMath.KaTeX,
+        ],
+      });
+    </script>
+  </body>
+</html>
